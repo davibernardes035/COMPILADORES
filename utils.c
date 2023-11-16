@@ -11,6 +11,11 @@ struct elemTabSimbolos {
     int tip;        // tipo
 } tabSimb[TAM_TAB], elemTab;
 
+enum{
+    INT,
+    LOG
+};
+
 int posTab = 0; // indica a proxima posicao livre para inserir
 
 int buscaSimbolo (char *s){
@@ -44,6 +49,20 @@ void insereSimbolo (struct elemTabSimbolos elem){
     
 }
 
+void mostraTabela () {
+    puts ("TABELA DE SIMBOLOS");
+    puts ("------------------");
+    printf("%30s | %s | %s\n", "ID", "END", "TIP");
+    for (int i = 0; i < 50; i++)
+        printf("-");
+    for (int i = 0; i < posTab; i++)
+        printf("\n%30s | %3d | %3s |", 
+                tabSimb[i].id, 
+                tabSimb[i].end, 
+                tabSimb[i].tip == INT ? "INT" : "LOG");
+    puts("");
+}
+
 // Pilha semantica
 #define TAM_PILHA 100
 
@@ -54,12 +73,11 @@ void empilha (int valor){
     if(topo == TAM_PILHA)
         yyerror ("Pilha semantica cheia!");
 
-    pilha[topo++] = valor;
+    pilha[++topo] = valor;
 }
 
 int desempilha (){
     if (topo == -1)
         yyerror("Pilha vazia!");
-
     return pilha[topo--];
 }

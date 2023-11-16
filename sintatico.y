@@ -5,6 +5,10 @@
 
     #include "lexico.c"
     #include "utils.c"
+
+    int contaVar = 0;
+    int rotulo = 0;
+    int tipo;
 %}
 
 %token T_PROGRAMA
@@ -51,12 +55,19 @@
 
 programa
     : cabecalho variaveis 
-        { fprintf(yyout, "\tAMEM\n"); }
+        { 
+            mostraTabela();
+            empilha(contaVar);
+            if(contaVar)
+                fprintf(yyout, "\tAMEM\t%d\n", contaVar); 
+        }
     T_INICIO lista_comandos T_FIM
         { 
-            fprintf(yyout, "\tDMEM\n");
-            fprintf(yyout, "\tFIMP\n"); 
+            int conta = desempilha();
+            if(conta)
+                fprintf(yyout, "\tDMEM\t%d\n", conta);
         }
+        {   fprintf(yyout, "\tFIMP\n"); }
     ;
 
 cabecalho
@@ -76,12 +87,31 @@ declaracao_variaveis
 
 tipo
     : T_LOGICO
+        {tipo = LOG;}
     | T_INTEIRO
+        { tipo = INT;}
     ;
 
 lista_variaveis
-    : T_IDENTIF lista_variaveis
+    : lista_variaveis 
+    T_IDENTIF
+        { 
+            strcpy(elemTab.id, atomo);
+            elemTab.end = contaVar;
+            elemTab.tip = tipo;
+            insereSimbolo (elemTab);
+            contaVar++; 
+
+        } 
+    
     | T_IDENTIF
+        { 
+            strcpy(elemTab.id, atomo);
+            elemTab.end = contaVar;
+            elemTab.tip = tipo;
+            insereSimbolo (elemTab);
+            contaVar++; 
+        } 
     ;
 
 lista_comandos
@@ -104,8 +134,9 @@ entrada_saida
 entrada
     : T_LEIA T_IDENTIF
         {   
+            int pos = buscaSimbolo(atomo);
             fprintf(yyout, "\tLEIA\n"); 
-            fprintf(yyout, "\tARZG\n"); 
+            fprintf(yyout, "\tARZG\t%d\n", tabSimb[pos].end); 
         }
     ;
 
@@ -116,32 +147,56 @@ saida
     ;
 
 atribuicao
-    : T_IDENTIF T_ATRIB expressao
-        { fprintf(yyout, "\tARZG\n"); }
+    : T_IDENTIF 
+        { 
+            int pos = buscaSimbolo(atomo);
+            empilha(pos);
+        }
+    T_ATRIB expressao
+        { 
+            int pos = desempilha();
+            fprintf(yyout, "\tARZG\t%d\n", tabSimb[pos].end); 
+        }
     ;
 
 selecao
     : T_SE expressao T_ENTAO
-        { fprintf(yyout, "\tDSVF\tLx\n"); }
+        { 
+            fprintf(yyout, "\tDSVF\tL%d\n", ++rotulo);
+            empilha(rotulo); 
+        }
      lista_comandos T_SENAO 
         { 
-            fprintf(yyout, "\tDSVS\tLy\n");
-            fprintf(yyout, "Lx\tNADA\n"); 
+            fprintf(yyout, "\tDSVS\tL%d\n", ++rotulo);
+            int rot = desempilha();
+            fprintf(yyout, "L%d\tNADA\n", rot); 
+            empilha(rotulo);
         }
      lista_comandos T_FIMSE
-        { fprintf(yyout, "Ly\tNADA\n"); }
+        { 
+            int rot = desempilha();
+            fprintf(yyout, "L%d\tNADA\n", rot); 
+        }
     ;
 
 repeticao
     : T_ENQTO 
-        { fprintf(yyout, "Lx\tNADA\n"); }
+        { 
+            fprintf(yyout, "L%d\tNADA\n",++rotulo); 
+            empilha(rotulo);
+        }
      expressao T_FACA
-        { fprintf(yyout, "\tDVSF\tLy\n"); }
+        { 
+            fprintf(yyout, "\tDSVF\tL%d\n", ++rotulo); 
+            empilha(rotulo);
+        }
         
      lista_comandos T_FIMENQTO
         { 
-            fprintf(yyout, "\tDVSF\tLx\n"); 
-            fprintf(yyout, "Ly\tNADA\n"); 
+            int rot1 = desempilha();
+            int rot2 = desempilha();
+            fprintf(yyout, "\tDSVS\tL%d\n", rot2); 
+            fprintf(yyout, "L%d\tNADA\n", rot1); 
         }
     ;
 
@@ -169,7 +224,10 @@ expressao
 
 termo
     : T_IDENTIF
-        { fprintf(yyout, "\tCRVG\n"); }
+        { 
+            int pos = buscaSimbolo(atomo);
+            fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end); 
+        }
     | T_NUMERO
         { fprintf(yyout, "\tCRCT\t%s\n", atomo); }
     | T_V

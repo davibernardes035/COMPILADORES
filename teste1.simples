@@ -1,5 +1,5 @@
 programa teste1
-    inteiro a
+    inteiro a b c
 inicio
     leia a
     enquanto a < 100 faca
