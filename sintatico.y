@@ -11,6 +11,10 @@
     int tipo;
 %}
 
+%token T_INIDEF
+%token T_REGISTRO
+%token T_FIMDEF
+
 %token T_PROGRAMA
 %token T_INICIO
 %token T_FIM
@@ -54,7 +58,7 @@
 %%
 
 programa
-    : cabecalho variaveis 
+    : cabecalho define_registro variaveis 
         { 
             mostraTabela();
             empilha(contaVar);
@@ -75,6 +79,34 @@ cabecalho
         { fprintf(yyout, "\tINPP\n"); }
     ;
 
+define_registro
+    : lista_definicoes
+    ;
+
+lista_definicoes
+    : lista_definicoes T_INIDEF lista_campos T_FIMDEF T_IDENTIF
+    {
+        strcpy(elemTab.id, atomo);
+        elemTab.end = contaVar;
+        elemTab.tip = tipo;
+        insereSimbolo (elemTab);
+        contaVar++;
+    }
+    | T_INIDEF lista_campos T_FIMDEF T_IDENTIF
+    {
+        strcpy(elemTab.id, atomo);
+        elemTab.end = contaVar;
+        elemTab.tip = tipo;
+        insereSimbolo (elemTab);
+        contaVar++;
+    }
+    ;
+
+lista_campos
+    : lista_campos tipo T_IDENTIF
+    | tipo T_IDENTIF
+    ;
+
 variaveis
     : /*vazio*/
     | declaracao_variaveis
@@ -89,7 +121,9 @@ tipo
     : T_LOGICO
         {tipo = LOG;}
     | T_INTEIRO
-        { tipo = INT;}
+        { tipo = INT;} 
+    | T_REGISTRO T_IDENTIF
+        { tipo = REG;}
     ;
 
 lista_variaveis

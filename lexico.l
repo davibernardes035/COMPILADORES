@@ -18,6 +18,9 @@ programa          return T_PROGRAMA;
 inicio            return T_INICIO;
 fimprograma       return T_FIM;
 
+def               return T_INIDEF;
+fimdef            return T_FIMDEF;
+
 leia              return T_LEIA;
 escreva           return T_ESCREVA;
 
@@ -49,6 +52,7 @@ nao               return T_NAO;
 
 inteiro           return T_INTEIRO;
 logico            return T_LOGICO;
+registro          return T_REGISTRO;
 V                 return T_V;
 F                 return T_F;
 

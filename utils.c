@@ -13,7 +13,8 @@ struct elemTabSimbolos {
 
 enum{
     INT,
-    LOG
+    LOG,
+    REG
 };
 
 int posTab = 0; // indica a proxima posicao livre para inserir
@@ -55,11 +56,26 @@ void mostraTabela () {
     printf("%30s | %s | %s\n", "ID", "END", "TIP");
     for (int i = 0; i < 50; i++)
         printf("-");
-    for (int i = 0; i < posTab; i++)
-        printf("\n%30s | %3d | %3s |", 
+    for (int i = 0; i < posTab; i++){
+        if (tabSimb[i].tip == INT){
+            printf("\n%30s | %3d | %3s |", 
                 tabSimb[i].id, 
                 tabSimb[i].end, 
-                tabSimb[i].tip == INT ? "INT" : "LOG");
+                "INT");
+            
+        } else if(tabSimb[i].tip == LOG){
+            printf("\n%30s | %3d | %3s |", 
+                tabSimb[i].id, 
+                tabSimb[i].end, 
+                "LOG");
+        } else 
+        {
+            printf("\n%30s | %3d | %3s |", 
+                tabSimb[i].id, 
+                tabSimb[i].end, 
+                "REG");
+        }
+    }
     puts("");
 }
 
