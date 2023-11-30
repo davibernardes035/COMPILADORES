@@ -5,6 +5,7 @@
 
 #define TAM_TAB 100
 
+//acrescentar campos na tabela
 struct elemTabSimbolos {
     char id[100];   // nome do identificador
     int end;        // endereco
@@ -16,6 +17,12 @@ enum{
     LOG,
     REG
 };
+
+//Duas modificações, duas rotinas: inserir na lista encadeada, e percorrer a lista.
+
+// criar uma estrutura e operações para manipular uma lista de campos
+
+char nomeTipo[3][4] = {"INT", "LOG", "REG"};
 
 int posTab = 0; // indica a proxima posicao livre para inserir
 
@@ -57,24 +64,10 @@ void mostraTabela () {
     for (int i = 0; i < 50; i++)
         printf("-");
     for (int i = 0; i < posTab; i++){
-        if (tabSimb[i].tip == INT){
-            printf("\n%30s | %3d | %3s |", 
-                tabSimb[i].id, 
-                tabSimb[i].end, 
-                "INT");
-            
-        } else if(tabSimb[i].tip == LOG){
-            printf("\n%30s | %3d | %3s |", 
-                tabSimb[i].id, 
-                tabSimb[i].end, 
-                "LOG");
-        } else 
-        {
-            printf("\n%30s | %3d | %3s |", 
-                tabSimb[i].id, 
-                tabSimb[i].end, 
-                "REG");
-        }
+        printf("\n%30s | %3d | %3s |", 
+            tabSimb[i].id, 
+            tabSimb[i].end, 
+            nomeTipo[tabSimb[i].tip]);
     }
     puts("");
 }

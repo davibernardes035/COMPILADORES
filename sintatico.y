@@ -8,12 +8,14 @@
 
     int contaVar = 0;
     int rotulo = 0;
+    int ehRegistro = 0;
     int tipo;
 %}
 
-%token T_INIDEF
+%token T_DEF
 %token T_REGISTRO
 %token T_FIMDEF
+%token T_IDPONTO
 
 %token T_PROGRAMA
 %token T_INICIO
@@ -79,32 +81,32 @@ cabecalho
         { fprintf(yyout, "\tINPP\n"); }
     ;
 
-define_registro
-    : lista_definicoes
+tipo
+    : T_LOGICO
+        {tipo = LOG;}
+    | T_INTEIRO
+        { tipo = INT;} 
+    | T_REGISTRO T_IDENTIF
+        { tipo = REG;}
     ;
 
-lista_definicoes
-    : lista_definicoes T_INIDEF lista_campos T_FIMDEF T_IDENTIF
-    {
-        strcpy(elemTab.id, atomo);
-        elemTab.end = contaVar;
-        elemTab.tip = tipo;
-        insereSimbolo (elemTab);
-        contaVar++;
-    }
-    | T_INIDEF lista_campos T_FIMDEF T_IDENTIF
-    {
-        strcpy(elemTab.id, atomo);
-        elemTab.end = contaVar;
-        elemTab.tip = tipo;
-        insereSimbolo (elemTab);
-        contaVar++;
-    }
+define_registro
+    : define define_registro
+    | 
+    ;
+
+define
+    : T_DEF definicao_campos T_FIMDEF T_IDENTIF
+    ;
+
+definicao_campos
+    : tipo lista_campos definicao_campos
+    | tipo lista_campos
     ;
 
 lista_campos
-    : lista_campos tipo T_IDENTIF
-    | tipo T_IDENTIF
+    : lista_campos T_IDENTIF
+    | T_IDENTIF
     ;
 
 variaveis
@@ -115,15 +117,6 @@ variaveis
 declaracao_variaveis
     : tipo lista_variaveis declaracao_variaveis
     | tipo lista_variaveis
-    ;
-
-tipo
-    : T_LOGICO
-        {tipo = LOG;}
-    | T_INTEIRO
-        { tipo = INT;} 
-    | T_REGISTRO T_IDENTIF
-        { tipo = REG;}
     ;
 
 lista_variaveis
@@ -184,7 +177,7 @@ saida
     ;
 
 atribuicao
-    : T_IDENTIF 
+    : expressao_acesso 
         { 
             int pos = buscaSimbolo(atomo);
             empilha(pos);
@@ -295,13 +288,30 @@ expressao
     | termo
     ;
 
-termo
+expressao_acesso
     : T_IDENTIF
         { 
-            int pos = buscaSimbolo(atomo);
-            fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end); 
-            empilha(tabSimb[pos].tip);
+            if(ehRegistro){
+                empilha(REG);
+            }
+            else {
+                int pos = buscaSimbolo(atomo);
+                fprintf(yyout, "\tCRVG\t%d\n", tabSimb[pos].end); 
+                empilha(tabSimb[pos].tip);
+                
+            }
+            ehRegistro = 0;
         }
+    | T_IDPONTO 
+        {
+            if (!ehRegistro)
+                ehRegistro = 1;
+        }
+    expressao_acesso
+    ;
+
+termo
+    : expressao_acesso
     | T_NUMERO
         { 
             fprintf(yyout, "\tCRCT\t%s\n", atomo); 
